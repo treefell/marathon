@@ -24,6 +24,7 @@ import scala.concurrent.duration.FiniteDuration
   */
 object Builders {
 
+
   object newRootGroup {
     /**
       * Construct a new rootGroup containing the specified pods and apps. Interim groups are automatically created.

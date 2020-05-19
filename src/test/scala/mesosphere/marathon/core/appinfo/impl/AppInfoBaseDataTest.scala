@@ -134,8 +134,8 @@ class AppInfoBaseDataTest extends UnitTest with GroupCreation {
 
       val agentInfo = Instance.AgentInfo("host.some", Some("agent-1"), None, None, List())
 
-      val eTask1 = EnrichedTask(app.id, task1, agentInfo, healthCheckResults = Vector(), servicePorts = List(), reservation = None, "*")
-      val eTask2 = EnrichedTask(app.id, task2, agentInfo, healthCheckResults = Vector(), servicePorts = List(), reservation = None, "*")
+      val eTask1 = EnrichedTask(app.id, task1, agentInfo, healthCheckResults = Vector(), servicePorts = List(), reservation = None, "*", cpus = 1, mem = 32, resourceLimits = None)
+      val eTask2 = EnrichedTask(app.id, task2, agentInfo, healthCheckResults = Vector(), servicePorts = List(), reservation = None, "*", cpus = 1, mem = 32, resourceLimits = None)
 
       val eTasks: Seq[raml.Task] = Vector(Raml.toRaml(eTask1), Raml.toRaml(eTask2))
 
@@ -182,9 +182,9 @@ class AppInfoBaseDataTest extends UnitTest with GroupCreation {
       appInfo should be(raml.AppInfo.fromParent(parent = Raml.toRaml(app), tasks =
         Some(
           Seq(
-            Raml.toRaml(EnrichedTask(running1.runSpecId, running1.appTask, TestInstanceBuilder.defaultAgentInfo, Nil, Nil, None, "*")),
-            Raml.toRaml(EnrichedTask(running2.runSpecId, running2.appTask, TestInstanceBuilder.defaultAgentInfo, Seq(alive), Nil, None, "*")),
-            Raml.toRaml(EnrichedTask(running3.runSpecId, running3.appTask, TestInstanceBuilder.defaultAgentInfo, Seq(unhealthy), Nil, None, "*"))
+            Raml.toRaml(EnrichedTask.fromInstance(running1).head),
+            Raml.toRaml(EnrichedTask.fromInstance(running2).head),
+            Raml.toRaml(EnrichedTask.fromInstance(running3).head)
           )
         )
       ))

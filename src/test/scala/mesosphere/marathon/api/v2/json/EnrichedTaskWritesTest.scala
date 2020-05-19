@@ -36,7 +36,7 @@ class EnrichedTaskWritesTest extends UnitTest {
         .withAgentInfo(agentInfo)
         .addTaskStaging(since = time)
         .getInstance()
-      EnrichedTask(instance.runSpecId, instance.appTask, agentInfo, Nil, Nil, None, "*")
+      EnrichedTask(instance.runSpecId, instance.appTask, agentInfo, Nil, Nil, None, "*", cpus = 1, mem = 32, resourceLimits = None)
     }
 
     def mesosStatus(taskId: Task.Id) = {
@@ -57,7 +57,7 @@ class EnrichedTaskWritesTest extends UnitTest {
         .addTaskWithBuilder().taskStaging(since = time)
         .withNetworkInfo(networkInfo)
         .build().getInstance()
-      EnrichedTask(instance.runSpecId, instance.appTask, agentInfo, Nil, Nil, None, "*")
+      EnrichedTask(instance.runSpecId, instance.appTask, agentInfo, Nil, Nil, None, "*", cpus = 1, mem = 32, resourceLimits = None)
     }
   }
 
