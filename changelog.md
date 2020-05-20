@@ -1,4 +1,12 @@
-## Changes from 1.9.136 to 1.10.xxx
+## Changes from 1.10.17 to 1.10.x
+
+### resourceLimits in pods and apps instance API
+
+`/v2/tasks` and `/v2/pods::status` includes the aggregate resourceLimits for each instance, enabling easier reporting of resourceLimits.
+
+Also, `/v2/tasks` now reports the cpus and mem consumed for each instance.
+
+## Changes from 1.9.136 to 1.10.17
 
 ### Vertical container bursting support and shared cgroups
 
