@@ -2312,7 +2312,7 @@ class AppsResourceTest extends AkkaUnitTest with GroupCreation with JerseyTest {
       }
     }
 
-    "Create an app in root with acceptedResourceRoles = customMesosRole and sanitizeAcceptedResourceRoles = true" in new Fixture(
+    "Create an app in root with acceptedResourceRoles = *,customMesosRole and sanitizeAcceptedResourceRoles = true" in new Fixture(
       configArgs = Seq("--deprecated_features", "sanitize_accepted_resource_roles")
     ) {
 
@@ -2320,7 +2320,7 @@ class AppsResourceTest extends AkkaUnitTest with GroupCreation with JerseyTest {
       val app = App(
         id = "/app-with-accepted-unknown-mesos-role",
         cmd = Some("cmd"),
-        acceptedResourceRoles = Some(Set("customMesosRole")))
+        acceptedResourceRoles = Some(Set("*", "customMesosRole")))
 
       val (body, _) = prepareApp(app, groupManager, validate = false)
 
