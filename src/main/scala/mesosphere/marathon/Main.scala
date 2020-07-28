@@ -26,6 +26,7 @@ import scala.jdk.CollectionConverters._
 class MarathonApp(args: Seq[String]) extends AutoCloseable with StrictLogging {
   private var running = false
 
+  logger.info("Opportunistic task scheduler")
   SLF4JBridgeHandler.removeHandlersForRootLogger()
   SLF4JBridgeHandler.install()
   Thread.setDefaultUncaughtExceptionHandler((thread: Thread, throwable: Throwable) => {

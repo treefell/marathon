@@ -190,19 +190,37 @@ private[impl] class OfferMatcherManagerActor private (
     (random.shuffle(reserved) ++ random.shuffle(normal)).to(Queue)
   }
 
+  def logResources(offer: Offer)={
+    offer.getResourcesList().forEach( res =>
+    {
+      logger.info("--------- offer " + s"${offer.getId()} =>${res}")
+    })
+  }
+  def offerRevocable(offer: Offer): Offer ={
+    val builder = offer.toBuilder.clearResources()
+    offer.getResourcesList.forEach(res =>{
+      if (res.getName!="cpus" || res.hasRevocable)
+        builder.addResources(res)
+    })
+    builder.build()
+  }
+
   def receiveProcessOffer: Receive = {
     case ActorOfferMatcher.MatchOffer(offer: Offer, promise: Promise[OfferMatcher.MatchedInstanceOps]) if !offersWanted =>
-      completeWithNoMatch("No offers wanted", offer, promise, resendThisOffer = matchers.nonEmpty)
+      val newOffer = offerRevocable(offer)
+      logResources(newOffer)
+      completeWithNoMatch("No offers wanted", newOffer, promise, resendThisOffer = matchers.nonEmpty)
 
     case ActorOfferMatcher.MatchOffer(offer: Offer, promise: Promise[OfferMatcher.MatchedInstanceOps]) =>
+      val newOffer = offerRevocable(offer)
       val deadline = clock.now() + conf.offerMatchingTimeout()
       if (offerQueues.size < conf.maxParallelOffers()) {
-        startProcessOffer(offer, deadline, promise)
+        startProcessOffer(newOffer, deadline, promise)
       } else if (unprocessedOffers.size < conf.maxQueuedOffers()) {
-        logger.debug(s"The maximum number of configured offers is processed at the moment. Queue offer ${offer.getId.getValue}.")
-        unprocessedOffers ::= UnprocessedOffer(offer, deadline, promise)
+        logger.debug(s"The maximum number of configured offers is processed at the moment. Queue offer ${newOffer.getId.getValue}.")
+        unprocessedOffers ::= UnprocessedOffer(newOffer, deadline, promise)
       } else {
-        completeWithNoMatch("Queue is full", offer, promise, resendThisOffer = true)
+        completeWithNoMatch("Queue is full", newOffer, promise, resendThisOffer = true)
       }
     case CleanUpOverdueOffers =>
       logger.debug(
