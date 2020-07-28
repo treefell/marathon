@@ -11,7 +11,7 @@ import org.apache.mesos.Protos.Offer.Operation
 import org.apache.mesos.Protos.Resource.RevocableInfo
 
 import scala.jdk.CollectionConverters._
-import org.apache.mesos.Protos.{OfferID, Status}
+import org.apache.mesos.Protos.{OfferID, Status, TaskInfo}
 import org.apache.mesos.{Protos, SchedulerDriver}
 
 private[launcher] class TaskLauncherImpl(metrics: Metrics, marathonSchedulerDriverHolder: MarathonSchedulerDriverHolder)
@@ -25,30 +25,32 @@ private[launcher] class TaskLauncherImpl(metrics: Metrics, marathonSchedulerDriv
   private[this] val declinedOffersMetric =
     metrics.counter("mesos.offers.declined")
 
-  def operationWithRevocable(operation: Operation): Operation = {
-    //val resourcesBuilder= operation.getLaunch.getTaskInfos(4).getResourcesList.iterator()
+  def taskInfoWithRevocable(taskInfo: TaskInfo): TaskInfo ={
+    val resIt = taskInfo.getResourcesList.iterator()
+    val taskInfoBuilder = taskInfo.toBuilder
+    taskInfoBuilder.clearResources()
+    while (resIt.hasNext) {
+      val resource = resIt.next()
+      if (resource.getName == "cpus")
+        taskInfoBuilder.addResources(resource.toBuilder.setRevocable(RevocableInfo.newBuilder()).build())
+      else
+        taskInfoBuilder.addResources(resource)
+    }
+    taskInfoBuilder.build()
+  }
 
+
+  def operationWithRevocable(operation: Operation): Operation = {
     val launchBuilder = operation.getLaunch.toBuilder
-    launchBuilder.clearTaskInfos()
     //can make a function of it
     val taskInfoIt = operation.getLaunch.getTaskInfosList.iterator()
+    launchBuilder.clearTaskInfos()
     while (taskInfoIt.hasNext){
-      val taskInfoBuilder = taskInfoIt.next().toBuilder
-      //can make a function of it
-      val resIt = taskInfoBuilder.getResourcesList.iterator()
-      taskInfoBuilder.clearResources()
-      while (resIt.hasNext) {
-        if (resIt.next().getName == "cpus")
-          taskInfoBuilder.addResources(resIt.next().toBuilder.setRevocable(RevocableInfo.newBuilder()).build())
-        else
-          taskInfoBuilder.addResources(resIt.next())
-      }
-      launchBuilder.addTaskInfos(taskInfoBuilder.build())
+      launchBuilder.addTaskInfos(taskInfoWithRevocable(taskInfoIt.next()))
     }
-
     val operationBuilder = operation.toBuilder
     operationBuilder.setLaunch(launchBuilder)
-    logger.info(s"DEBUG OPPORTUNISTIC:\n${operationBuilder.getLaunch.getTaskInfosList}\n" )
+    logger.info(s"DEBUG OPPORTUNISTIC:\n${operationBuilder.getLaunch.getTaskInfos(0).getResourcesList}\n" )
     operationBuilder.build()
   }
 
