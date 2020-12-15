@@ -11,7 +11,7 @@ import org.apache.mesos.Protos.Offer.Operation
 import org.apache.mesos.Protos.Resource.RevocableInfo
 
 import scala.jdk.CollectionConverters._
-import org.apache.mesos.Protos.{OfferID, Status, TaskInfo}
+import org.apache.mesos.Protos.{OfferID, Status, TaskGroupInfo, TaskInfo}
 import org.apache.mesos.{Protos, SchedulerDriver}
 
 private[launcher] class TaskLauncherImpl(metrics: Metrics, marathonSchedulerDriverHolder: MarathonSchedulerDriverHolder)
@@ -39,12 +39,18 @@ private[launcher] class TaskLauncherImpl(metrics: Metrics, marathonSchedulerDriv
     taskInfoBuilder.build()
   }
 
+  //nothing in taskgroup
+  def taskGroupWithRevocable(taskGroupInfo : TaskGroupInfo) ={
+    taskGroupInfo
+  }
 
   def operationWithRevocable(operation: Operation): Operation = {
     val launchBuilder = operation.getLaunch.toBuilder
     //can make a function of it
     val taskInfoIt = operation.getLaunch.getTaskInfosList.iterator()
     launchBuilder.clearTaskInfos()
+    val taskGroup = operation.getLaunchGroup.getTaskGroup()
+    //taskGroupWithRevocable(taskGroup)
     while (taskInfoIt.hasNext){
       launchBuilder.addTaskInfos(taskInfoWithRevocable(taskInfoIt.next()))
     }

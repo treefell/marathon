@@ -208,7 +208,7 @@ private[impl] class OfferMatcherManagerActor private (
   def receiveProcessOffer: Receive = {
     case ActorOfferMatcher.MatchOffer(offer: Offer, promise: Promise[OfferMatcher.MatchedInstanceOps]) if !offersWanted =>
       val newOffer = offerRevocable(offer)
-      logResources(newOffer)
+      //logResources(newOffer)
       completeWithNoMatch("No offers wanted", newOffer, promise, resendThisOffer = matchers.nonEmpty)
 
     case ActorOfferMatcher.MatchOffer(offer: Offer, promise: Promise[OfferMatcher.MatchedInstanceOps]) =>
